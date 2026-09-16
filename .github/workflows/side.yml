@@ -27,7 +27,7 @@ jobs:
           rustup target list --installed
 
       - name: Build unsigned IPA
-        run: ./build.sh -p lc -c wd,la,cc,vpn
+        run: ./build.sh -p alt -c wd,la,cc
 
       - name: List dist artifacts
         if: always()
