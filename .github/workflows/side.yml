@@ -1,0 +1,41 @@
+name: Build IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    env:
+      # Liquid Glass API (glassEffect) требует SDK iOS 26 из Xcode 26
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios,aarch64-apple-ios-sim,x86_64-apple-ios
+
+      - name: Toolchain info
+        run: |
+          xcodebuild -version
+          xcode-select -p
+          rustc -vV
+          rustup target list --installed
+
+      - name: Build unsigned IPA
+        run: ./build.sh -p side -c wd,la,cc,vpn
+
+      - name: List dist artifacts
+        if: always()
+        run: ls -la dist/ || true
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TgWsProxy-ipa
+          path: dist/*.ipa
+          if-no-files-found: error
